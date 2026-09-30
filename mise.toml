@@ -1,0 +1,5 @@
+# Tool dependencies for this repo. Run `mise install` to install them.
+[tools]
+just = "latest"
+opencode = "latest"
+"llama.cpp" = "latest"   # prebuilt ggml-org release; provides llama-server and llama-cli
