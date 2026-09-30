@@ -4,6 +4,8 @@
 model := "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:UD-Q4_K_XL"
 # Model id for opencode, derived from `model` (e.g. qwen3-coder-30b-a3b-instruct-gguf-ud-q4_k_xl)
 model_id := lowercase(replace(file_name(model), ":", "-"))
+# Hugging Face repo without the ":<quant>" suffix (e.g. unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF)
+model_repo := replace_regex(model, ":.*$", "")
 host := "127.0.0.1"
 port := "8080"
 ctx := "32768"
@@ -86,6 +88,10 @@ code-local-ai *args: opencode-config
         printf '\r\033[Kmodel ready in %ds\n' "$((SECONDS - start))"
     fi
     opencode --print-logs --log-level {{opencode_log_level}} -m llamacpp/{{model_id}} {{args}} 2>>{{opencode_log}}
+
+# Open the current model's Hugging Face page in the browser
+hf:
+    open "https://huggingface.co/{{model_repo}}"
 
 # Tail the opencode and llama-server logs
 logs:
