@@ -1,0 +1,29 @@
+# Justfile for Solid.js TODO app
+
+# Development server
+dev:
+	npm run dev
+
+# Build for production
+build:
+	npm run build
+
+# Preview production build
+preview:
+	npm run preview
+
+# Run tests
+test:
+	npm run test
+
+# Format code
+format:
+	npm run format
+
+# Lint code
+lint:
+	npm run lint
+
+# Clean build artifacts
+clean:
+	rm -rf dist
