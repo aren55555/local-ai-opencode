@@ -6,7 +6,10 @@ model_file := "Bonsai-8B-Q1_0.gguf"
 host := "127.0.0.1"
 port := "8080"
 ctx := "32768"
-log := "/tmp/bonsai-llama-server.log"
+logs := ".logs"
+log := logs + "/llama-server.log"
+opencode_log := logs + "/opencode.log"
+opencode_log_level := "DEBUG"
 
 # List available recipes
 [private]
@@ -36,14 +39,16 @@ chat prompt="Say hello in one sentence.":
         -d '{"model":"bonsai-8b","messages":[{"role":"user","content":"{{prompt}}"}]}' \
         | jq -r '.choices[0].message.content'
 
-# Launch opencode in this repo using the local llama.cpp provider
+# Launch opencode in this repo using the local llama.cpp provider (logs to .logs/opencode.log)
 code *args:
-    opencode -m llamacpp/bonsai-8b {{args}}
+    @mkdir -p {{logs}}
+    opencode --print-logs --log-level {{opencode_log_level}} -m llamacpp/bonsai-8b {{args}} 2>>{{opencode_log}}
 
 # Start llama.cpp if needed, launch opencode, shut both down on exit
 code-local-ai *args:
     #!/usr/bin/env bash
     set -euo pipefail
+    mkdir -p {{logs}}
     health="http://{{host}}:{{port}}/health"
     if curl -sf "$health" >/dev/null 2>&1; then
         echo "llama-server already running on {{host}}:{{port}} (will be left running)"
@@ -77,7 +82,11 @@ code-local-ai *args:
         done
         printf '\r\033[Kmodel ready in %ds\n' "$((SECONDS - start))"
     fi
-    opencode -m llamacpp/bonsai-8b {{args}}
+    opencode --print-logs --log-level {{opencode_log_level}} -m llamacpp/bonsai-8b {{args}} 2>>{{opencode_log}}
+
+# Tail the opencode and llama-server logs
+logs:
+    tail -n 50 -F {{opencode_log}} {{log}}
 
 # Stop any running llama.cpp server
 stop:
